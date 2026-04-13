@@ -21,6 +21,10 @@ namespace Explosion.API.Repositories
         {
             return _context.Users.Find(id);
         }
+        public User? SearchUserEmail(string email)
+        {
+            return _context.Users.FirstOrDefault(u => u.Email == email);
+        }
 
         public User Create(User user)
         {

@@ -22,6 +22,11 @@ namespace Explosion.API.Repositories
             return _context.Products.Find(id);
         }
 
+        public Product? SearchName(string nome)
+        {
+            return _context.Products.Find(nome);
+        }
+
         public Product Create(Product product)
         {
             _context.Products.Add(product);

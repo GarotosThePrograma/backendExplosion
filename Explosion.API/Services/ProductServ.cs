@@ -20,6 +20,10 @@ namespace Explosion.API.Services
         {
             return _repository.SearchId(id);
         }
+        public Product? SearchName(string nome)
+        {
+            return _repository.SearchName(nome);
+        }
         public Product Create(productDTO dto)
         {
             var product = new Product

@@ -1,5 +1,6 @@
 using Explosion.API.DTO;
 using Explosion.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Explosion.API.Controllers
@@ -22,14 +23,22 @@ namespace Explosion.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles ="Admin")]
         public IActionResult SearchId(int id)
         {
             var Product = _service.SearchId(id);
             if (Product == null) return NotFound("Produto não encontrado");
             return Ok(Product);
         }
-
+        [HttpGet("{nome}")]
+        public IActionResult SearchName(string nome)
+        {
+            var Product = _service.SearchName(nome);
+            if (Product == null) return NotFound("Produto não encontrado");
+            return Ok(Product);
+        }
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create(productDTO dto)
         {
             var Product = _service.Create(dto);
@@ -37,6 +46,7 @@ namespace Explosion.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Update(int id, productDTO dto)
         {
             var product = _service.Update(id, dto);
@@ -45,6 +55,7 @@ namespace Explosion.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Remove(int id)
         {
             var result = _service.Remove(id);
@@ -53,6 +64,7 @@ namespace Explosion.API.Controllers
         }
 
         [HttpPost("{id}/comprar")]
+        [Authorize(Roles = "User")]
         public IActionResult FinishBuy(int id, [FromQuery] int quantidade)
         {
             var result = _service.FinishBuy(id, quantidade);

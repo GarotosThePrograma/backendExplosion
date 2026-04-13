@@ -1,18 +1,23 @@
 using Explosion.API.DTO;
+using Explosion.API.Repositories;
 using Explosion.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Explosion.API.Controllers
 {
     [ApiController]
     [Route("api/users")]
+    [Authorize(Roles ="Admin")]
     public class UserController : ControllerBase
     {
         private readonly UserServ _service;
+        private readonly UsersRep _repository;
 
-        public UserController(UserServ service)
+        public UserController(UserServ service, UsersRep rep)
         {
             _service = service;
+            _repository = rep;
         }
 
         [HttpGet]
@@ -50,6 +55,15 @@ namespace Explosion.API.Controllers
             var result = _service.Remove(id);
             if (!result) return NotFound("Usuário não encontrado");
             return Ok("Usuário removido com sucesso");
+        }
+        [HttpPatch("promover/{id}")]
+        public IActionResult PromoteADM(int id)
+        {
+            var user = _repository.SearchUserId(id);
+            if (user == null) return NotFound("Usuário não encontrado");
+            user.Role = "ADM";
+            _repository.Update(user);
+            return Ok("O usuário agora é administrador" );
         }
     }
 }
