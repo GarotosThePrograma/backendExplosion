@@ -1,9 +1,11 @@
+using Explosion.API.DTO;
+using Explosion.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Explosion.API.Controllers
 {
     [ApiController]
-    [Route("api/products")]
+    [Route("api/Products")]
     public class ProductController : ControllerBase
     {
         private readonly ProductServ _service;
@@ -22,16 +24,16 @@ namespace Explosion.API.Controllers
         [HttpGet("{id}")]
         public IActionResult SearchId(int id)
         {
-            var product = _service.SearchId(id);
-            if (product == null) return NotFound("Produto não encontrado");
-            return Ok(product);
+            var Product = _service.SearchId(id);
+            if (Product == null) return NotFound("Produto não encontrado");
+            return Ok(Product);
         }
 
         [HttpPost]
         public IActionResult Create(productDTO dto)
         {
-            var product = _service.Create(dto);
-            return Ok(product);
+            var Product = _service.Create(dto);
+            return Ok(Product);
         }
 
         [HttpPut("{id}")]

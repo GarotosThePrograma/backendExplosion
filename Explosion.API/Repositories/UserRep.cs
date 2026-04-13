@@ -3,35 +3,35 @@ using Explosion.API.Models;
 
 namespace Explosion.API.Repositories
 {
-    public class UserRep
+    public class UsersRep
     {
         private readonly ExpDbContext _context;
 
-        public UserRep(ExpDbContext context)
+        public UsersRep(ExpDbContext context)
         {
             _context = context;
         }
 
         public List<User> ListEmU()
         {
-            return _context.User.ToList();
+            return _context.Users.ToList();
         }
 
         public User? SearchUserId(int id)
         {
-            return _context.User.Find(id);
+            return _context.Users.Find(id);
         }
 
         public User Create(User user)
         {
-            _context.User.Add(user);
+            _context.Users.Add(user);
             _context.SaveChanges();
             return user;
         }
 
         public User Update(User user)
         {
-            _context.User.Update(user);
+            _context.Users.Update(user);
             _context.SaveChanges();
             return user;
         }
@@ -41,7 +41,7 @@ namespace Explosion.API.Repositories
             var user = SearchUserId(id);
             if (user != null)
             {
-                _context.User.Remove(user);
+                _context.Users.Remove(user);
                 _context.SaveChanges();
             }
         }

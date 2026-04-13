@@ -1,4 +1,6 @@
+using Explosion.API.Data;
 using Explosion.API.Repositories;
+using Explosion.API.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +9,7 @@ builder.Services.AddDbContext<ExpDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ProductRep>();
-builder.Services.AddScoped<UserRep>();
+builder.Services.AddScoped<UsersRep>();
 builder.Services.AddScoped<ProductServ>();
 builder.Services.AddScoped<UserServ>();
 
