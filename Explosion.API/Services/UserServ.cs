@@ -10,7 +10,7 @@ namespace Explosion.API.Services
 
         public UserServ(UsersRep repository)
         {
-            repository = _repository;
+            _repository = repository;
         }
         public List<User> ListEm()
         {
@@ -26,7 +26,6 @@ namespace Explosion.API.Services
             {
                 Email = dto.Email,
                 Endereco = dto.Endereco,
-                IdUser = dto.IdUser,
                 Nome = dto.Nome,
             };
             return _repository.Create(User);
@@ -37,7 +36,6 @@ namespace Explosion.API.Services
             if (User == null) return null;
 
             User.Nome = dto.Nome;
-            User.IdUser = dto.IdUser;
             User.Email = dto.Email;
             User.Endereco = dto.Endereco;
         

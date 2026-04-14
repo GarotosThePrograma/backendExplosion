@@ -61,7 +61,7 @@ namespace Explosion.API.Controllers
         {
             var user = _repository.SearchUserId(id);
             if (user == null) return NotFound("Usuário não encontrado");
-            user.Role = "ADM";
+            user.Role = "Admin";
             _repository.Update(user);
             return Ok("O usuário agora é administrador" );
         }

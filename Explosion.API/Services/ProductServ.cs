@@ -10,7 +10,7 @@ namespace Explosion.API.Services
 
         public ProductServ(ProductRep repository)
         {
-            repository = _repository;
+            _repository = repository;
         }
         public List<Product> ListEm()
         {
@@ -33,7 +33,6 @@ namespace Explosion.API.Services
                 Preco = dto.Preco,
                 Imagem = dto.Imagem,
                 Estoque = dto.Estoque,
-                IdProd = dto.IdProd
             };
             return _repository.Create(product);
         }
@@ -43,7 +42,6 @@ namespace Explosion.API.Services
             if (product == null) return null;
 
             product.Nome = dto.Nome;
-            product.IdProd = dto.IdProd;
             product.Descricao = dto.Descricao;
             product.Estoque = dto.Estoque;
             product.Preco = dto.Preco;

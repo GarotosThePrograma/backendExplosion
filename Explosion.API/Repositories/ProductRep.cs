@@ -24,7 +24,7 @@ namespace Explosion.API.Repositories
 
         public Product? SearchName(string nome)
         {
-            return _context.Products.Find(nome);
+            return _context.Products.FirstOrDefault(p => p.Nome == nome);
         }
 
         public Product Create(Product product)

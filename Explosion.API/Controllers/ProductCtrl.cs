@@ -22,7 +22,7 @@ namespace Explosion.API.Controllers
             return Ok(_service.ListEm());
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [Authorize(Roles ="Admin")]
         public IActionResult SearchId(int id)
         {
@@ -30,7 +30,7 @@ namespace Explosion.API.Controllers
             if (Product == null) return NotFound("Produto não encontrado");
             return Ok(Product);
         }
-        [HttpGet("{nome}")]
+        [HttpGet("nome/{nome}")]
         public IActionResult SearchName(string nome)
         {
             var Product = _service.SearchName(nome);

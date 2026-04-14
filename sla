@@ -1,0 +1,8 @@
+"Host=ep-restless-thunder-acb5pb6f-pooler.sa-east-1.aws.neon.tech; 
+Database=neondb; 
+Username=neondb_owner; 
+Password=npg_o4bGYgA1VTQR; 
+SSL Mode=VerifyFull; 
+Channel Binding=Require;"
+
+$env:ConnectionStrings__DefaultConnection="Host=ep-restless-thunder-acb5pb6f-pooler.sa-east-1.aws.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_o4bGYgA1VTQR;SSL Mode=VerifyFull;Trust Server Certificate=true"

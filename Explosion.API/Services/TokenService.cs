@@ -16,18 +16,25 @@ namespace Explosion.API.Services
         }
         public string CreateToken(User user)
         {
+            var jwtKey = _config["Jwt:Key"]
+                ?? throw new InvalidOperationException("A chave JWT (Jwt:Key) não foi configurada.");
+            var issuer = _config["Jwt:Issuer"]
+                ?? throw new InvalidOperationException("O emissor JWT (Jwt:Issuer) não foi configurado.");
+            var audience = _config["Jwt:Audience"]
+                ?? throw new InvalidOperationException("A audiência JWT (Jwt:Audience) não foi configurada.");
+
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.IdUser.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuers"],
-                audience: _config["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims:claims,
                 expires:DateTime.Now.AddHours(8),
                 signingCredentials:creds

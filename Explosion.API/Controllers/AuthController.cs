@@ -12,32 +12,44 @@ namespace Explosion.API.Controllers
     {
         private readonly UsersRep _repository;
         private readonly TokenService _tokenService;
+
         public AuthController(UsersRep repository, TokenService tokenService)
         {
             _repository = repository;
             _tokenService = tokenService;
         }
+
         [HttpPost("login")]
         public IActionResult Login(LoginDTO dto)
         {
             var user = _repository.SearchUserEmail(dto.Email);
             if (user == null || user.Senha != dto.Senha)
                 return Unauthorized("Email ou senha invalidos");
-            var token = _tokenService.CreateToken(user);
-            return Ok(new{token});
-        }
-        [HttpPost("register")]
-        public IActionResult RegisterUser([FromBody]User user)
-        {
-            var UserExist = _repository.SearchUserEmail(user.Email);
-            if(UserExist != null)
-            {
-                return BadRequest("Esse email já possui um usuário cadastrado");
-            }
-            user.Role = "User";
-            _repository.Create(user);
 
-            return Ok("Usuário criado com sucesso");
-        }   
+            var token = _tokenService.CreateToken(user);
+            return Ok(new { token });
+        }
+
+        [HttpPost("register")]
+        public IActionResult RegisterUser([FromBody] RegisterDTO dto)
+        {
+            var userExist = _repository.SearchUserEmail(dto.Email);
+            if (userExist != null)
+            {
+                return BadRequest("Esse email ja possui um usuario cadastrado");
+            }
+
+            var user = new User
+            {
+                Email = dto.Email,
+                Endereco = dto.Endereco,
+                Senha = dto.Senha,
+                Nome = dto.Nome,
+                Role = "User"
+            };
+
+            _repository.Create(user);
+            return Ok("Usuario criado com sucesso");
+        }
     }
 }
