@@ -22,9 +22,9 @@ namespace Explosion.API.Repositories
             return _context.Products.Find(id);
         }
 
-        public Product? SearchName(string nome)
+        public Product? SearchName(string name)
         {
-            return _context.Products.FirstOrDefault(p => p.Nome == nome);
+            return _context.Products.FirstOrDefault(p => p.Name == name);
         }
 
         public Product Create(Product product)

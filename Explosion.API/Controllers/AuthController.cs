@@ -23,7 +23,7 @@ namespace Explosion.API.Controllers
         public IActionResult Login(LoginDTO dto)
         {
             var user = _repository.SearchUserEmail(dto.Email);
-            if (user == null || user.Senha != dto.Senha)
+            if (user == null || user.Password != dto.Password)
                 return Unauthorized("Email ou senha invalidos");
 
             var token = _tokenService.CreateToken(user);
@@ -42,9 +42,9 @@ namespace Explosion.API.Controllers
             var user = new User
             {
                 Email = dto.Email,
-                Endereco = dto.Endereco,
-                Senha = dto.Senha,
-                Nome = dto.Nome,
+                Address = dto.Address,
+                Password = dto.Password,
+                Name = dto.Name,
                 Role = "User"
             };
 
@@ -53,3 +53,5 @@ namespace Explosion.API.Controllers
         }
     }
 }
+
+

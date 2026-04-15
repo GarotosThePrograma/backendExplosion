@@ -16,37 +16,37 @@ namespace Explosion.API.Controllers
             _service = service;
         }
 
-        [HttpGet]
+        [HttpGet("productslist")]
         public IActionResult ListEm()
         {
             return Ok(_service.ListEm());
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles ="Admin")]
+        //[Authorize(Roles ="Admin")]
         public IActionResult SearchId(int id)
         {
             var Product = _service.SearchId(id);
             if (Product == null) return NotFound("Produto não encontrado");
             return Ok(Product);
         }
-        [HttpGet("nome/{nome}")]
-        public IActionResult SearchName(string nome)
+        [HttpGet("name/{name}")]
+        public IActionResult SearchName(string name)
         {
-            var Product = _service.SearchName(nome);
+            var Product = _service.SearchName(name);
             if (Product == null) return NotFound("Produto não encontrado");
             return Ok(Product);
         }
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [HttpPost("createproduct")]
+        //[Authorize(Roles = "Admin")]
         public IActionResult Create(productDTO dto)
         {
             var Product = _service.Create(dto);
             return Ok(Product);
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [HttpPut("update/{id}")]
+        //[Authorize(Roles = "Admin")]
         public IActionResult Update(int id, productDTO dto)
         {
             var product = _service.Update(id, dto);
@@ -54,8 +54,8 @@ namespace Explosion.API.Controllers
             return Ok(product);
         }
 
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [HttpDelete("delete/{id}")]
+        //[Authorize(Roles = "USER")]
         public IActionResult Remove(int id)
         {
             var result = _service.Remove(id);
@@ -64,7 +64,7 @@ namespace Explosion.API.Controllers
         }
 
         [HttpPost("{id}/comprar")]
-        [Authorize(Roles = "User")]
+        //[Authorize(Roles = "User")]
         public IActionResult FinishBuy(int id, [FromQuery] int quantidade)
         {
             var result = _service.FinishBuy(id, quantidade);
@@ -73,3 +73,4 @@ namespace Explosion.API.Controllers
         }
     }
 }
+

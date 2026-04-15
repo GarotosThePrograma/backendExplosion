@@ -20,19 +20,19 @@ namespace Explosion.API.Services
         {
             return _repository.SearchId(id);
         }
-        public Product? SearchName(string nome)
+        public Product? SearchName(string name)
         {
-            return _repository.SearchName(nome);
+            return _repository.SearchName(name);
         }
         public Product Create(productDTO dto)
         {
             var product = new Product
             {
-                Nome = dto.Nome,
-                Descricao = dto.Descricao,
-                Preco = dto.Preco,
-                Imagem = dto.Imagem,
-                Estoque = dto.Estoque,
+                Name = dto.Name,
+                Description = dto.Description,
+                Price = dto.Price,
+                Image = dto.Image,
+                Stock = dto.Stock,
             };
             return _repository.Create(product);
         }
@@ -41,11 +41,11 @@ namespace Explosion.API.Services
             var product = _repository.SearchId(id);
             if (product == null) return null;
 
-            product.Nome = dto.Nome;
-            product.Descricao = dto.Descricao;
-            product.Estoque = dto.Estoque;
-            product.Preco = dto.Preco;
-            product.Imagem = dto.Imagem;
+            product.Name = dto.Name;
+            product.Description = dto.Description;
+            product.Stock = dto.Stock;
+            product.Price = dto.Price;
+            product.Image = dto.Image;
         
             return _repository.Update(product);
         }
@@ -57,17 +57,18 @@ namespace Explosion.API.Services
             _repository.Remove(id);
             return true;
         }
-        public bool FinishBuy(int id, int estoque)
+        public bool FinishBuy(int id, int Stock)
         {
             var product = _repository.SearchId(id);
             if(product == null) return false;
-            if (product.Estoque < estoque)
+            if (product.Stock < Stock)
             {
-                throw new Exception("Estoque insuficiente");
+                throw new Exception("Stock insuficiente");
             }
-            product.Estoque -= estoque;
+            product.Stock -= Stock;
             _repository.Update(product);
             return true;
         }
     }
 }
+

@@ -9,11 +9,12 @@ namespace Explosion.API.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int IdProd { get; set; }
         
-        public string Nome { get; set; } = string.Empty;
-        public decimal Preco { get; set; }
-        public int Estoque { get; set; }
-        public string Imagem { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
+        public string Image { get; set; } = string.Empty;
         public int Tipo { get; set; }
-        public string Descricao { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
     }
 }
+

@@ -1,9 +1,10 @@
 namespace Explosion.API.DTO{
     public class productDTO{
-        public string Nome{get;set;} = string.Empty;
-        public decimal Preco{get;set;}
-        public string Imagem{get;set;} = string.Empty;
-        public int Estoque{get;set;}
-        public string Descricao{get;set;} = string.Empty;
+        public string Name{get;set;} = string.Empty;
+        public decimal Price{get;set;}
+        public string Image{get;set;} = string.Empty;
+        public int Stock{get;set;}
+        public string Description{get;set;} = string.Empty;
     }
 }
+

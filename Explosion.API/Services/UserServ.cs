@@ -25,8 +25,8 @@ namespace Explosion.API.Services
             var User = new User
             {
                 Email = dto.Email,
-                Endereco = dto.Endereco,
-                Nome = dto.Nome,
+                Address = dto.Address,
+                Name = dto.Name,
             };
             return _repository.Create(User);
         }
@@ -35,9 +35,9 @@ namespace Explosion.API.Services
             var User = _repository.SearchUserId(id);
             if (User == null) return null;
 
-            User.Nome = dto.Nome;
+            User.Name = dto.Name;
             User.Email = dto.Email;
-            User.Endereco = dto.Endereco;
+            User.Address = dto.Address;
         
             return _repository.Update(User);
         }
@@ -51,3 +51,4 @@ namespace Explosion.API.Services
         }
     }
 }
+

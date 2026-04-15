@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -17,12 +17,12 @@ namespace Explosion.API.Migrations
                 {
                     IdProd = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "text", nullable: false),
-                    Preco = table.Column<decimal>(type: "numeric", nullable: false),
-                    Estoque = table.Column<int>(type: "integer", nullable: false),
-                    Imagem = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Stock = table.Column<int>(type: "integer", nullable: false),
+                    Image = table.Column<string>(type: "text", nullable: false),
                     Tipo = table.Column<int>(type: "integer", nullable: false),
-                    Descricao = table.Column<string>(type: "text", nullable: false)
+                    Description = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,9 +36,9 @@ namespace Explosion.API.Migrations
                     IdUser = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Email = table.Column<string>(type: "text", nullable: false),
-                    Endereco = table.Column<string>(type: "text", nullable: false),
-                    Senha = table.Column<string>(type: "text", nullable: false),
-                    Nome = table.Column<string>(type: "text", nullable: false)
+                    Address = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,3 +57,5 @@ namespace Explosion.API.Migrations
         }
     }
 }
+
+
