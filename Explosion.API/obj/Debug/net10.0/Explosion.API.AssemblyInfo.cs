@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Explosion.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+880a90c5022c80186bca305727c8f992a7759c87")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+02eb7c9a7aa51534e959eef98b127f75a3bf8f86")]
 [assembly: System.Reflection.AssemblyProductAttribute("Explosion.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Explosion.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

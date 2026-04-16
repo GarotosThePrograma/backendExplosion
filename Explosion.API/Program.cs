@@ -20,6 +20,11 @@ builder.Services.AddScoped<UsersRep>();
 builder.Services.AddScoped<ProductServ>();
 builder.Services.AddScoped<UserServ>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<CartRep>();
+builder.Services.AddScoped<FavoriteRep>();
+
+builder.Services.AddScoped<CartServ>();
+builder.Services.AddScoped<FavoriteServ>();
 
 builder.Services.AddCors(options =>
 {
