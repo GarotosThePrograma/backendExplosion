@@ -2,6 +2,9 @@ using Explosion.API.DTOs;
 using Explosion.API.Data;
 using Explosion.API.Models;
 using Explosion.API.Repositories;
+using Explosion.API.Common;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Explosion.API.Services
 {
@@ -20,23 +23,19 @@ namespace Explosion.API.Services
 
         public CartResponseDTO GetMyCart(int userId)
         {
-            var cart = _cartRep.GetByUserId(userId) ?? _cartRep.CreateCart(userId);
+            var cart = GetOrCreateCart(userId);
             return MapCart(cart);
         }
 
         public CartResponseDTO AddItem(int userId, AddCartItemDTO dto)
         {
-            var cart = _cartRep.GetByUserId(userId) ?? _cartRep.CreateCart(userId);
-
-            var product = _productRep.SearchId(dto.ProductId)
-                ?? throw new KeyNotFoundException("Produto nao encontrado");
-
-            var existingItem = _cartRep.GetItemCart(cart.Id, dto.ProductId);
+            var cart = GetOrCreateCart(userId);
+            var product = GetRequiredProduct(dto.ProductId);
+            var existingItem = _cartRep.GetByCartAndProduct(cart.Id, dto.ProductId);
 
             if (existingItem is null)
             {
-                if (product.Stock < dto.Quantity)
-                    throw new InvalidOperationException("Estoque insuficiente");
+                ValidateStock(product, dto.Quantity);
 
                 _cartRep.AddItem(new CartItem
                 {
@@ -49,84 +48,75 @@ namespace Explosion.API.Services
             else
             {
                 var newQty = existingItem.Quantity + dto.Quantity;
-                if (product.Stock < newQty)
-                    throw new InvalidOperationException("Estoque insuficiente");
+                ValidateStock(product, newQty);
 
                 existingItem.Quantity = newQty;
                 _cartRep.UpdateItem(existingItem);
             }
 
             _cartRep.UpdateCart(cart);
-            var updated = _cartRep.GetByUserId(userId)!;
-            return MapCart(updated);
+            return MapCart(GetOrCreateCart(userId));
         }
 
         public CartResponseDTO UpdateItem(int userId, int itemId, UpdateCartItemDTO dto)
         {
-            var cart = _cartRep.GetByUserId(userId) ?? throw new KeyNotFoundException("Carrinho nao encontrado");
-            var item = _cartRep.GetItemById(itemId) ?? throw new KeyNotFoundException("Item nao encontrado no carrinho");
+            var cart = GetRequiredCart(userId);
+            var item = GetRequiredOwnedItem(cart, itemId);
+            var product = GetRequiredProduct(item.ProductId);
 
-            if (item.CartId != cart.Id)
-                throw new InvalidOperationException("O item nao pertence ao carrinho");
-
-            var product = _productRep.SearchId(item.ProductId)
-                ?? throw new KeyNotFoundException("Produto nao encontrado");
-
-            if (product.Stock < dto.Quantity)
-                throw new InvalidOperationException("Estoque insuficiente");
-
+            ValidateStock(product, dto.Quantity);
             item.Quantity = dto.Quantity;
+
             _cartRep.UpdateItem(item);
             _cartRep.UpdateCart(cart);
 
-            var updated = _cartRep.GetByUserId(userId)!;
-            return MapCart(updated);
+            return MapCart(GetRequiredCart(userId));
         }
 
         public CartResponseDTO RemoveItem(int userId, int itemId)
         {
-            var cart = _cartRep.GetByUserId(userId) ?? throw new KeyNotFoundException("Carrinho nao encontrado");
-            var item = _cartRep.GetItemById(itemId) ?? throw new KeyNotFoundException("Item nao encontrado no carrinho");
-
-            if (item.CartId != cart.Id)
-                throw new InvalidOperationException("Item nao pertence ao carrinho");
+            var cart = GetRequiredCart(userId);
+            var item = GetRequiredOwnedItem(cart, itemId);
 
             _cartRep.RemoveItem(item);
             _cartRep.UpdateCart(cart);
 
-            var updated = _cartRep.GetByUserId(userId)!;
-            return MapCart(updated);
+            return MapCart(GetRequiredCart(userId));
         }
 
         public CartResponseDTO Clear(int userId)
         {
-            var cart = _cartRep.GetByUserId(userId) ?? _cartRep.CreateCart(userId);
+            var cart = GetOrCreateCart(userId);
 
             _cartRep.ClearCart(cart.Id);
             _cartRep.UpdateCart(cart);
 
-            var updated = _cartRep.GetByUserId(userId)!;
-            return MapCart(updated);
+            return MapCart(GetOrCreateCart(userId));
         }
 
         public CheckoutResponseDTO Checkout(int userId)
         {
-            var cart = _cartRep.GetByUserId(userId) ?? throw new KeyNotFoundException("Carrinho nao encontrado");
-            if (cart.Items.Count == 0)
-                throw new InvalidOperationException("Carrinho vazio");
-
-            using var transaction = _context.Database.BeginTransaction();
+            using var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable);
             try
             {
+                var cart = _context.Carts
+                    .Include(c => c.Items)
+                    .ThenInclude(i => i.Product)
+                    .FirstOrDefault(c => c.UserId == userId)
+                    ?? throw new KeyNotFoundException("Carrinho nao encontrado");
+
+                if (cart.Items.Count == 0)
+                    throw new InvalidOperationException(CheckoutMessage.EmptyCart);
+
                 foreach (var item in cart.Items)
                 {
-                    var product = item.Product ?? _productRep.SearchId(item.ProductId);
-                    if (product == null)
-                        throw new KeyNotFoundException($"Produto {item.ProductId} nao encontrado");
-                    item.Product = product;
+                    var product = item.Product
+                        ?? throw new KeyNotFoundException("Produto nao encontrado no carrinho");
 
-                    if (product.Stock < item.Quantity)
-                        throw new InvalidOperationException($"Estoque insuficiente para o produto {product.Name}");
+                    ValidateStock(
+                        product,
+                        item.Quantity,
+                        $"{CheckoutMessage.InsufficientStockPrefix} para o produto {product.Name}");
                 }
 
                 var totalItems = 0;
@@ -136,6 +126,7 @@ namespace Explosion.API.Services
                 {
                     var product = item.Product!;
                     product.Stock -= item.Quantity;
+
                     totalItems += item.Quantity;
                     totalAmount += item.UnitPrice * item.Quantity;
                 }
@@ -146,9 +137,10 @@ namespace Explosion.API.Services
 
                 return new CheckoutResponseDTO
                 {
+                    Status = CheckoutStatus.Success,
                     TotalItems = totalItems,
                     TotalAmount = totalAmount,
-                    Message = "Checkout realizado com sucesso"
+                    Message = CheckoutMessage.CheckoutSuccess
                 };
             }
             catch
@@ -156,6 +148,37 @@ namespace Explosion.API.Services
                 transaction.Rollback();
                 throw;
             }
+        }
+
+        private Cart GetOrCreateCart(int userId)
+        {
+            return _cartRep.GetByUserId(userId) ?? _cartRep.CreateForUser(userId);
+        }
+
+        private Cart GetRequiredCart(int userId)
+        {
+            return _cartRep.GetByUserId(userId) ?? throw new KeyNotFoundException("Carrinho nao encontrado");
+        }
+
+        private Product GetRequiredProduct(int productId)
+        {
+            return _productRep.GetById(productId) ?? throw new KeyNotFoundException("Produto nao encontrado");
+        }
+
+        private CartItem GetRequiredOwnedItem(Cart cart, int itemId)
+        {
+            var item = _cartRep.GetItemById(itemId) ?? throw new KeyNotFoundException("Item nao encontrado no carrinho");
+
+            if (item.CartId != cart.Id)
+                throw new InvalidOperationException("Item nao pertence ao carrinho");
+
+            return item;
+        }
+
+        private static void ValidateStock(Product product, int quantity, string? message = null)
+        {
+            if (product.Stock < quantity)
+                throw new InvalidOperationException(message ?? CheckoutMessage.InsufficientStockPrefix);
         }
 
         private static CartResponseDTO MapCart(Cart cart)

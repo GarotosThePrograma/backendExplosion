@@ -12,19 +12,25 @@ namespace Explosion.API.Services
         {
             _repository = repository;
         }
-        public List<Product> ListEm()
+
+        public List<ProductResponseDTO> List()
         {
-            return _repository.ListEm();
+            return _repository.List().Select(MapToResponse).ToList();
         }
-        public Product? SearchId(int id)
+
+        public ProductResponseDTO? GetById(int id)
         {
-            return _repository.SearchId(id);
+            var product = _repository.GetById(id);
+            return product is null ? null : MapToResponse(product);
         }
-        public Product? SearchName(string name)
+
+        public ProductResponseDTO? GetByName(string name)
         {
-            return _repository.SearchName(name);
+            var product = _repository.GetByName(name);
+            return product is null ? null : MapToResponse(product);
         }
-        public Product Create(ProductDTO dto)
+
+        public ProductResponseDTO Create(ProductDTO dto)
         {
             var product = new Product
             {
@@ -34,11 +40,13 @@ namespace Explosion.API.Services
                 Image = dto.Image,
                 Stock = dto.Stock,
             };
-            return _repository.Create(product);
+
+            return MapToResponse(_repository.Create(product));
         }
-        public Product? Update(int id, ProductDTO dto)
+
+        public ProductResponseDTO? Update(int id, ProductDTO dto)
         {
-            var product = _repository.SearchId(id);
+            var product = _repository.GetById(id);
             if (product == null) return null;
 
             product.Name = dto.Name;
@@ -46,29 +54,46 @@ namespace Explosion.API.Services
             product.Stock = dto.Stock;
             product.Price = dto.Price;
             product.Image = dto.Image;
-        
-            return _repository.Update(product);
+
+            return MapToResponse(_repository.Update(product));
         }
+
         public bool Remove(int id)
         {
-            var product = _repository.SearchId(id);
-            if(product == null) return false;
-            
+            var product = _repository.GetById(id);
+            if (product == null) return false;
+
             _repository.Remove(id);
             return true;
         }
-        public bool FinishBuy(int id, int Stock)
+
+        public bool FinishBuy(int id, int quantity)
         {
-            var product = _repository.SearchId(id);
-            if(product == null) return false;
-            if (product.Stock < Stock)
+            var product = _repository.GetById(id);
+            if (product == null) return false;
+
+            if (product.Stock < quantity)
             {
                 throw new InvalidOperationException("Stock insuficiente");
             }
-            product.Stock -= Stock;
+
+            product.Stock -= quantity;
             _repository.Update(product);
             return true;
         }
+
+        private static ProductResponseDTO MapToResponse(Product product)
+        {
+            return new ProductResponseDTO
+            {
+                Id = product.IdProd,
+                Name = product.Name,
+                Price = product.Price,
+                Stock = product.Stock,
+                Image = product.Image,
+                Type = product.Tipo,
+                Description = product.Description
+            };
+        }
     }
 }
-

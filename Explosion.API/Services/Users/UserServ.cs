@@ -6,49 +6,67 @@ namespace Explosion.API.Services
 {
     public class UserServ
     {
-        private readonly UsersRep _repository;
+        private readonly UserRep _repository;
 
-        public UserServ(UsersRep repository)
+        public UserServ(UserRep repository)
         {
             _repository = repository;
         }
-        public List<User> ListEm()
+
+        public List<UserResponseDTO> List()
         {
-            return _repository.ListEmU();
+            return _repository.List().Select(MapToResponse).ToList();
         }
-        public User? SearchId(int id)
+
+        public UserResponseDTO? GetById(int id)
         {
-            return _repository.SearchUserId(id);
+            var user = _repository.GetById(id);
+            return user is null ? null : MapToResponse(user);
         }
-        public User Create(UserDTO dto)
+
+        public UserResponseDTO Create(UserDTO dto)
         {
-            var User = new User
+            var user = new User
             {
                 Email = dto.Email,
                 Address = dto.Address,
                 Name = dto.Name,
             };
-            return _repository.Create(User);
-        }
-        public User? Update(int id, UserDTO dto)
-        {
-            var User = _repository.SearchUserId(id);
-            if (User == null) return null;
 
-            User.Name = dto.Name;
-            User.Email = dto.Email;
-            User.Address = dto.Address;
-        
-            return _repository.Update(User);
+            return MapToResponse(_repository.Create(user));
         }
+
+        public UserResponseDTO? Update(int id, UserDTO dto)
+        {
+            var user = _repository.GetById(id);
+            if (user == null) return null;
+
+            user.Name = dto.Name;
+            user.Email = dto.Email;
+            user.Address = dto.Address;
+
+            return MapToResponse(_repository.Update(user));
+        }
+
         public bool Remove(int id)
         {
-            var User = _repository.SearchUserId(id);
-            if(User == null) return false;
-            
-            _repository.DeleteUser(id);
+            var user = _repository.GetById(id);
+            if (user == null) return false;
+
+            _repository.DeleteById(id);
             return true;
+        }
+
+        private static UserResponseDTO MapToResponse(User user)
+        {
+            return new UserResponseDTO
+            {
+                Id = user.IdUser,
+                Name = user.Name,
+                Email = user.Email,
+                Address = user.Address,
+                Role = user.Role
+            };
         }
     }
 }
-

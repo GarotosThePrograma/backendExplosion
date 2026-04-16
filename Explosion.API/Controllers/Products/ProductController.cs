@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Explosion.API.Controllers
 {
     [ApiController]
-    [Route("api/Products")]
-    public class ProductController : ControllerBase
+    [Route("api/products")]
+    public class ProductController : ApiControllerBase
     {
         private readonly ProductServ _service;
 
@@ -16,67 +16,121 @@ namespace Explosion.API.Controllers
             _service = service;
         }
 
+        [HttpGet]
         [HttpGet("productslist")]
-        public IActionResult ListEm()
+        public IActionResult List()
         {
-            return Ok(_service.ListEm());
+            try
+            {
+                return Ok(_service.List());
+            }
+            catch (Exception ex)
+            {
+                return HandleApiException(ex);
+            }
         }
 
         [HttpGet("{id:int}")]
-        public IActionResult SearchId(int id)
+        public IActionResult GetById(int id)
         {
-            var product = _service.SearchId(id);
-            if (product == null) return NotFound("Produto nao encontrado");
-            return Ok(product);
+            try
+            {
+                var product = _service.GetById(id);
+                if (product == null) return NotFound(new { message = "Produto nao encontrado" });
+                return Ok(product);
+            }
+            catch (Exception ex)
+            {
+                return HandleApiException(ex);
+            }
         }
 
         [HttpGet("name/{name}")]
-        public IActionResult SearchName(string name)
+        public IActionResult GetByName(string name)
         {
-            var product = _service.SearchName(name);
-            if (product == null) return NotFound("Produto nao encontrado");
-            return Ok(product);
+            try
+            {
+                var product = _service.GetByName(name);
+                if (product == null) return NotFound(new { message = "Produto nao encontrado" });
+                return Ok(product);
+            }
+            catch (Exception ex)
+            {
+                return HandleApiException(ex);
+            }
         }
 
+        [HttpPost]
         [HttpPost("createproduct")]
         [Authorize(Roles = "Admin")]
         public IActionResult Create(ProductDTO dto)
         {
-            var product = _service.Create(dto);
-            return Ok(product);
+            try
+            {
+                var product = _service.Create(dto);
+                return Ok(product);
+            }
+            catch (Exception ex)
+            {
+                return HandleApiException(ex);
+            }
         }
 
-        [HttpPut("update/{id}")]
+        [HttpPut("{id:int}")]
+        [HttpPut("update/{id:int}")]
         [Authorize(Roles = "Admin")]
         public IActionResult Update(int id, ProductDTO dto)
         {
-            var product = _service.Update(id, dto);
-            if (product == null) return NotFound("Produto nao encontrado");
-            return Ok(product);
+            try
+            {
+                var product = _service.Update(id, dto);
+                if (product == null) return NotFound(new { message = "Produto nao encontrado" });
+                return Ok(product);
+            }
+            catch (Exception ex)
+            {
+                return HandleApiException(ex);
+            }
         }
 
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("{id:int}")]
+        [HttpDelete("delete/{id:int}")]
         [Authorize(Roles = "Admin")]
         public IActionResult Remove(int id)
         {
-            var result = _service.Remove(id);
-            if (!result) return NotFound("Produto nao encontrado");
-            return Ok("Produto removido com sucesso");
+            try
+            {
+                var result = _service.Remove(id);
+                if (!result) return NotFound(new { message = "Produto nao encontrado" });
+                return Ok(new { message = "Produto removido com sucesso" });
+            }
+            catch (Exception ex)
+            {
+                return HandleApiException(ex);
+            }
         }
 
-        [HttpPost("{id}/comprar")]
+        [HttpPost("{id:int}/buy")]
+        [HttpPost("{id:int}/comprar")]
         [Authorize(Roles = "User,Admin")]
-        public IActionResult FinishBuy(int id, [FromQuery] int quantidade)
+        public IActionResult Buy(
+            int id,
+            [FromQuery(Name = "quantidade")] int? legacyQuantity,
+            [FromQuery] int? quantity)
         {
             try
             {
-                var result = _service.FinishBuy(id, quantidade);
-                if (!result) return NotFound("Produto nao encontrado");
-                return Ok("Compra finalizada com sucesso");
+                var finalQuantity = quantity ?? legacyQuantity;
+                if (finalQuantity is null || finalQuantity <= 0)
+                    return BadRequest(new { message = "Quantidade invalida" });
+
+                var result = _service.FinishBuy(id, finalQuantity.Value);
+                if (!result) return NotFound(new { message = "Produto nao encontrado" });
+                return Ok(new { message = "Compra finalizada com sucesso" });
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return HandleApiException(ex);
             }
         }
     }

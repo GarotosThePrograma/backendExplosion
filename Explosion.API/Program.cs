@@ -4,22 +4,49 @@ using Explosion.API.Data;
 using Explosion.API.Repositories;
 using Explosion.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+var jwtKeyFromEnvironment = Environment.GetEnvironmentVariable("JWT__KEY")
+    ?? Environment.GetEnvironmentVariable("JWT_KEY");
+var jwtKeyFromConfig = builder.Configuration["Jwt:Key"];
+var jwtKey = !string.IsNullOrWhiteSpace(jwtKeyFromEnvironment)
+    ? jwtKeyFromEnvironment
+    : builder.Environment.IsDevelopment()
+        ? jwtKeyFromConfig
+        : null;
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException(
+        "JWT key not configured. Set environment variable JWT__KEY (or JWT_KEY).");
+}
+
+if (jwtKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "JWT key must have at least 32 characters.");
+}
+
+builder.Configuration["Jwt:Key"] = jwtKey;
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<ExpDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ProductRep>();
-builder.Services.AddScoped<UsersRep>();
+builder.Services.AddScoped<UserRep>();
 
 builder.Services.AddScoped<ProductServ>();
 builder.Services.AddScoped<UserServ>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<IPasswordHasher<Explosion.API.Models.User>, PasswordHasher<Explosion.API.Models.User>>();
 builder.Services.AddScoped<CartRep>();
 builder.Services.AddScoped<FavoriteRep>();
 
@@ -48,10 +75,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            RequireSignedTokens = true,
+            RequireExpirationTime = true,
+            ClockSkew = TimeSpan.Zero,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
@@ -99,11 +129,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["Referrer-Policy"] = "no-referrer";
+    await next();
+});
 
 app.UseCors("FrontendPolicy");
 
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

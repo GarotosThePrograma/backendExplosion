@@ -3,25 +3,25 @@ using Explosion.API.Models;
 
 namespace Explosion.API.Repositories
 {
-    public class UsersRep
+    public class UserRep
     {
         private readonly ExpDbContext _context;
 
-        public UsersRep(ExpDbContext context)
+        public UserRep(ExpDbContext context)
         {
             _context = context;
         }
 
-        public List<User> ListEmU()
+        public List<User> List()
         {
             return _context.Users.ToList();
         }
 
-        public User? SearchUserId(int id)
+        public User? GetById(int id)
         {
             return _context.Users.Find(id);
         }
-        public User? SearchUserEmail(string email)
+        public User? GetByEmail(string email)
         {
             return _context.Users.FirstOrDefault(u => u.Email == email);
         }
@@ -40,9 +40,9 @@ namespace Explosion.API.Repositories
             return user;
         }
 
-        public void DeleteUser(int id)
+        public void DeleteById(int id)
         {
-            var user = SearchUserId(id);
+            var user = GetById(id);
             if (user != null)
             {
                 _context.Users.Remove(user);

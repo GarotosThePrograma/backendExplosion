@@ -1,5 +1,6 @@
 using Explosion.API.DTOs;
 using Explosion.API.Services;
+using Explosion.API.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -101,9 +102,27 @@ namespace Explosion.API.Controllers
                 var result = _service.Checkout(userId);
                 return Ok(result);
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { status = CheckoutStatus.Failed, message = ex.Message });
+            }
+            catch (InvalidOperationException ex) when (ex.Message == CheckoutMessage.EmptyCart)
+            {
+                return BadRequest(new { status = CheckoutStatus.Failed, message = ex.Message });
+            }
+            catch (InvalidOperationException ex) when (
+                ex.Message.StartsWith(CheckoutMessage.InsufficientStockPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return Conflict(new { status = CheckoutStatus.Failed, message = ex.Message });
+            }
             catch (Exception ex)
             {
-                return HandleApiException(ex);
+                return StatusCode(500, new
+                {
+                    status = CheckoutStatus.Failed,
+                    message = CheckoutMessage.CheckoutInternalError,
+                    detail = ex.Message
+                });
             }
         }
     }

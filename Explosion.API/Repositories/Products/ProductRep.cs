@@ -12,17 +12,17 @@ namespace Explosion.API.Repositories
             _context = context;
         }
 
-        public List<Product> ListEm()
+        public List<Product> List()
         {
             return _context.Products.ToList();
         }
 
-        public Product? SearchId(int id)
+        public Product? GetById(int id)
         {
             return _context.Products.Find(id);
         }
 
-        public Product? SearchName(string name)
+        public Product? GetByName(string name)
         {
             return _context.Products.FirstOrDefault(p => p.Name == name);
         }
@@ -43,7 +43,7 @@ namespace Explosion.API.Repositories
 
         public void Remove(int id)
         {
-            var product = SearchId(id);
+            var product = GetById(id);
             if (product != null)
             {
                 _context.Products.Remove(product);

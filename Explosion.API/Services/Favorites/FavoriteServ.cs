@@ -31,7 +31,7 @@ namespace Explosion.API.Services
 
         public void Add(int userId, int productId)
         {
-            var product = _productRep.SearchId(productId)
+            var product = _productRep.GetById(productId)
                 ?? throw new KeyNotFoundException("Produto nao encontrado");
 
             if (_favoriteRep.Exists(userId, productId))

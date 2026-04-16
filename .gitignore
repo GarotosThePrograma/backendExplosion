@@ -1,0 +1,16 @@
+# Build artifacts
+**/bin/
+**/obj/
+
+# Local temporary outputs used during manual validation
+**/tmpbuild*/
+**/tmp-smoke-run/
+SecurityProbe/
+
+# Logs and diagnostics
+*.log
+
+# IDE
+.vs/
+*.user
+*.suo

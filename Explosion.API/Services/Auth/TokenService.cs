@@ -27,16 +27,19 @@ namespace Explosion.API.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, user.IdUser.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var accessTokenMinutes = _config.GetValue<int?>("Jwt:AccessTokenMinutes") ?? 480;
 
             var token = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
                 claims:claims,
-                expires:DateTime.Now.AddHours(8),
+                notBefore: DateTime.UtcNow,
+                expires:DateTime.UtcNow.AddMinutes(accessTokenMinutes),
                 signingCredentials:creds
             );
             return new JwtSecurityTokenHandler().WriteToken(token);

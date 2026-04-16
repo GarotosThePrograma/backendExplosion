@@ -18,7 +18,7 @@ namespace Explosion.API.Repositories
                 .ThenInclude(i => i.Product)
                 .FirstOrDefault(c => c.UserId == userId);
         }
-        public Cart CreateCart(int userId)
+        public Cart CreateForUser(int userId)
         {
             var cart = new Cart
             {
@@ -28,13 +28,14 @@ namespace Explosion.API.Repositories
             _context.SaveChanges();
             return cart;
         }
-                public CartItem? GetItemById(int itemId)
+        public CartItem? GetItemById(int itemId)
         {
             return _context.CartItems
                 .Include(i => i.Product)
                 .FirstOrDefault(i => i.Id == itemId);
         }
-        public CartItem? GetItemCart(int cartId, int productId)
+
+        public CartItem? GetByCartAndProduct(int cartId, int productId)
         {
             return _context.CartItems
                 .FirstOrDefault(i => i.CartId == cartId && i.ProductId == productId);
