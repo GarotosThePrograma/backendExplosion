@@ -29,7 +29,6 @@ namespace Explosion.API.Services
             var user = new User
             {
                 Email = dto.Email,
-                Address = dto.Address,
                 Name = dto.Name,
             };
 
@@ -43,7 +42,6 @@ namespace Explosion.API.Services
 
             user.Name = dto.Name;
             user.Email = dto.Email;
-            user.Address = dto.Address;
 
             return MapToResponse(_repository.Update(user));
         }
@@ -64,7 +62,6 @@ namespace Explosion.API.Services
                 Id = user.IdUser,
                 Name = user.Name,
                 Email = user.Email,
-                Address = user.Address,
                 Role = user.Role
             };
         }

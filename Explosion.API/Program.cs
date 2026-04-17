@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using Explosion.API.Data;
 using Explosion.API.Repositories;
@@ -61,10 +61,9 @@ builder.Services.AddCors(options =>
             .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
-            // .AllowCredentials(); // só se usar cookie/sessão
+        // .AllowCredentials(); // enable only if you use cookies/sessions
     });
 });
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -101,7 +100,7 @@ builder.Services.AddSwaggerGen(options =>
 
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Minha API",
+        Title = "Explosion API",
         Version = "v1"
     });
 

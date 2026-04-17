@@ -7,6 +7,10 @@
 **/tmp-smoke-run/
 SecurityProbe/
 
+# Local Codex metadata
+**/.agents/
+**/skills-lock.json
+
 # Logs and diagnostics
 *.log
 

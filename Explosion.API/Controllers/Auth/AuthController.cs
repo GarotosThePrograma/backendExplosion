@@ -73,7 +73,6 @@ namespace Explosion.API.Controllers
                 var user = new User
                 {
                     Email = dto.Email,
-                    Address = dto.Address,
                     Password = string.Empty,
                     Name = dto.Name,
                     Role = "User"
